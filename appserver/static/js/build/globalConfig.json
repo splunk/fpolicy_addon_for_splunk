@@ -1,0 +1,284 @@
+{
+    "pages": {
+        "configuration": {
+            "tabs": [
+                {
+                    "name": "account",
+                    "table": {
+                        "actions": [
+                            "edit",
+                            "delete",
+                            "clone"
+                        ],
+                        "header": [
+                            {
+                                "label": "Name",
+                                "field": "name"
+                            }
+                        ]
+                    },
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Account Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the account.",
+                            "required": true
+                        }
+                    ],
+                    "title": "Accounts"
+                },
+                {
+                    "name": "logging",
+                    "entity": [
+                        {
+                            "type": "singleSelect",
+                            "label": "Log level",
+                            "options": {
+                                "disableSearch": true,
+                                "autoCompleteFields": [
+                                    {
+                                        "value": "DEBUG",
+                                        "label": "DEBUG"
+                                    },
+                                    {
+                                        "value": "INFO",
+                                        "label": "INFO"
+                                    },
+                                    {
+                                        "value": "WARN",
+                                        "label": "WARN"
+                                    },
+                                    {
+                                        "value": "ERROR",
+                                        "label": "ERROR"
+                                    },
+                                    {
+                                        "value": "CRITICAL",
+                                        "label": "CRITICAL"
+                                    }
+                                ]
+                            },
+                            "defaultValue": "INFO",
+                            "field": "loglevel"
+                        }
+                    ],
+                    "title": "Logging"
+                }
+            ],
+            "title": "Configuration",
+            "description": "Set up your add-on"
+        },
+        "inputs": {
+            "services": [
+                {
+                    "template": "input_with_helper",
+                    "name": "server_input",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z\\w-]*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "field": "index",
+                            "label": "Index",
+                            "type": "singleSelect",
+                            "defaultValue": "default",
+                            "help": "An index to save File Notifications as XML.",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$"
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        },
+                        {
+                            "type": "text",
+                            "label": "Add-on Server IP",
+                            "field": "Server_IP",
+                            "help": "IP address for the Add-on as an External Server. Please see the external engine settings of FPolicy. (Use the external IP of the Splunk instance.)",
+                            "defaultValue": "0.0.0.0",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 7,
+                                    "maxLength": 15,
+                                    "errorMsg": "IP only."
+                                }
+                            ],
+                            "options": {
+                                "placeholder": "ex: 192.168.10.10"
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "label": "Add-on Server Port",
+                            "field": "Server_Port",
+                            "help": "Port number for the Add-on as an External Server. Please see the external engine settings of FPolicy. (Use an unused port number for each input.)",
+                            "defaultValue": "1337",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Port number only.",
+                                    "minLength": 2,
+                                    "maxLength": 5
+                                }
+                            ],
+                            "options": {
+                                "placeholder": "ex: 12345"
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "label": "Policy Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores or hyphen.",
+                                    "pattern": "^[a-zA-Z\\w-]*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 30",
+                                    "minLength": 1,
+                                    "maxLength": 30
+                                }
+                            ],
+                            "field": "Policy_Name",
+                            "help": "FPolicy File Policy Name. Please see the 'vserver fpolicy policy show' output. (Use the same Policy Name for a successful handshake with FPolicy. )",
+                            "required": true
+                        }
+                    ],
+                    "title": "server_input"
+                }
+            ],
+            "title": "Inputs",
+            "description": "Manage your data inputs",
+            "table": {
+                "actions": [
+                    "edit",
+                    "enable",
+                    "delete",
+                    "clone"
+                ],
+                "header": [
+                    {
+                        "label": "Name",
+                        "field": "name"
+                    },
+                    {
+                        "label": "Index",
+                        "field": "index"
+                    },
+                    {
+                        "label": "Status",
+                        "field": "disabled"
+                    }
+                ],
+                "moreInfo": [
+                    {
+                        "label": "Name",
+                        "field": "name"
+                    },
+                    {
+                        "label": "Index",
+                        "field": "index"
+                    },
+                    {
+                        "label": "Account to use",
+                        "field": "account"
+                    },
+                    {
+                        "label": "Status",
+                        "field": "disabled",
+                        "mapping": {
+                            "true": "Disabled",
+                            "false": "Enabled"
+                        }
+                    },
+                    {
+                        "label": "Add-on Server Port",
+                        "field": "Server_Port"
+                    },
+                    {
+                        "label": "Add-on Server IP",
+                        "field": "Server_IP"
+                    },
+                    {
+                        "label": "FPolicy Name",
+                        "field": "Policy_Name"
+                    }
+                ]
+            }
+        },
+        "dashboard": {
+            "panels": [
+                {
+                    "name": "addon_version"
+                },
+                {
+                    "name": "events_ingested_by_sourcetype"
+                },
+                {
+                    "name": "errors_in_the_addon"
+                }
+            ]
+        }
+    },
+    "meta": {
+        "name": "fpolicy_addon_for_splunk",
+        "restRoot": "fpolicy_addon_for_splunk",
+        "version": "1.5.6",
+        "displayName": "FPolicy Add-on for Splunk",
+        "schemaVersion": "0.0.3"
+    }
+}
