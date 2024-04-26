@@ -21,7 +21,7 @@
         "id": {
             "group": null,
             "name": "fpolicy_addon_for_splunk",
-            "version": "1.5.6"
+            "version": "1.7.6"
         },
         "license": {
             "name": null,

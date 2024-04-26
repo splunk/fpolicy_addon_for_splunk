@@ -130,6 +130,26 @@
                             ]
                         },
                         {
+                            "type": "text",
+                            "label": "Sourcetype",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Sourcetype must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z\\w-]*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "sourcetype",
+                            "help": "A unique sourcetype for the data.",
+                            "required": true
+                        },
+                        {
                             "type": "singleSelect",
                             "label": "Account to use",
                             "options": {
@@ -220,6 +240,10 @@
                         "field": "index"
                     },
                     {
+                        "label": "Sourcetype",
+                        "field": "sourcetype"
+                    },
+                    {
                         "label": "Status",
                         "field": "disabled"
                     }
@@ -232,6 +256,10 @@
                     {
                         "label": "Index",
                         "field": "index"
+                    },
+                    {
+                        "label": "Sourcetype",
+                        "field": "sourcetype"
                     },
                     {
                         "label": "Account to use",
@@ -277,7 +305,7 @@
     "meta": {
         "name": "fpolicy_addon_for_splunk",
         "restRoot": "fpolicy_addon_for_splunk",
-        "version": "1.5.6",
+        "version": "1.7.6",
         "displayName": "FPolicy Add-on for Splunk",
         "schemaVersion": "0.0.3"
     }

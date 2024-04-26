@@ -39,7 +39,7 @@ class ClientHandler(threading.Thread):
 
         # get input values
         index=self.helper.get_arg("index")
-        sourcetype=self.helper.get_arg("account")['name']
+        sourcetype=self.helper.get_arg("sourcetype")
         host = self.helper.get_arg("Server_IP")
         port = int(self.helper.get_arg("Server_Port"))
 
@@ -48,29 +48,18 @@ class ClientHandler(threading.Thread):
         while True:
             #inner_loop_count = inner_loop_count + 1
             raw_data = ""
-            hex_data = ""
 
             try:
                 # receive byte data
-                hex_data = self.client_sock.recv(1024)
+                raw_data = self.client_sock.recv(4096)
             except Exception as e:
-                self.helper.log_error('\n\n [ERROR] Get exception when client_sock.recv(1024). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
+                self.helper.log_error('\n\n [ERROR] Get exception when client_sock.recv(4096). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
 
-            if hex_data == "": 
-                self.helper.log_info(f"\n\n [INFO] Loop exit. [FPolicy : "+policy_name+"] \n\n")
+            if raw_data == "": 
+                #self.helper.log_info(f"\n\n [INFO] Loop exit. (raw_data == "":)[FPolicy : "+policy_name+"] \n\n")
                 break
-
-            unk_hex_data = hex_data[:6]
-
-            # first 6 chars are hexadecimal not binary
-            if hex_data!= "": 
-                self.helper.log_info(f"\n\n [INFO] hex_data received. (hex_data!= "") [FPolicy : "+policy_name+"] \n\n")
-                #raw_data = hex_data[6:]
-                raw_data = hex_data[6:-1]
                 
             try:
-                #check for handshake
-                #data = raw_data.decode()
                 data = ''  # an empty string to store decoded chars
 
                 for byte in raw_data:
@@ -86,7 +75,7 @@ class ClientHandler(threading.Thread):
                         data += '.'  # undecodable characters as '.' similar to wire shark
             except Exception as err:
                 self.helper.log_error('\n\n [ERROR] Get exception when byte.decode(). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
-                data_tmp = raw_data
+                data_tmp = data
 
             # here edit find the <SessionId>
             tag_start = "<SessionId>"
@@ -106,7 +95,7 @@ class ClientHandler(threading.Thread):
                 pattern = f'{re.escape(tag_start)}(.*?)\s*{re.escape(tag_end)}'
                 match_NotfType = re.search(pattern, data)
                 result_NotfType = match_NotfType.group(1)
-                self.helper.log_info("\n\n [INFO] NotfType : {}".format(result_NotfType) + " [FPolicy : "+policy_name+"] \n\n")
+                #self.helper.log_info("\n\n [INFO] NotfType : {}".format(result_NotfType) + " [FPolicy : "+policy_name+"] \n\n")
 
             if (match_VsUUID and match_SessionId and result_NotfType == 'NEGO_REQ'):
                 result_SessionId = match_SessionId.group(1)
@@ -140,10 +129,10 @@ class ClientHandler(threading.Thread):
                 except Exception as err:
                     self.helper.log_error('\n\n [ERROR] Get exception when client_sock.send(to_send). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
 
-            if raw_data != "": 
-                self.helper.log_info(f"\n\n [INFO] Data to write {index} index: {data}  [FPolicy : "+policy_name+"] \n\n")
+            if data != "": 
+                #self.helper.log_info(f"\n\n [INFO] Data to write {index} index: {data}  [FPolicy : "+policy_name+"] \n\n")
 
-                sourcetype=  policy_name  + "://" + self.helper.get_input_stanza_names()
+                #sourcetype=  policy_name  + "://" + self.helper.get_input_stanza_names()
                 event = self.helper.new_event(source=policy_name, index=index, sourcetype=sourcetype , data=data)
 
                 try:
@@ -151,18 +140,18 @@ class ClientHandler(threading.Thread):
                 except Exception as e:
                     self.helper.log_error('\n\n [ERROR] Get exception when ew.write_event(event). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
 
-                self.helper.log_info("\n\n [INFO] Event Inserted in XML format. \n source="+policy_name+", index="+index+", sourcetype="+sourcetype+" , data="+data+" [FPolicy : "+policy_name+"] \n\n")
+                self.helper.log_info("\n\n [INFO] Event Inserted in XML format. \n source="+policy_name+", index="+index+", sourcetype="+sourcetype+" , data=\n"+data+"\n [FPolicy : "+policy_name+"] \n\n")
 
-                self.helper.log_info(f"\n\n [INFO] Inner loop. [FPolicy : "+policy_name+"] \n\n")
+                #self.helper.log_info(f"\n\n [INFO] Inner loop. [FPolicy : "+policy_name+"] \n\n")
 
-            elif raw_data == "": 
-                self.helper.log_info(f"\n\n [INFO] Loop exit. [FPolicy : "+policy_name+"] \n\n")
+            elif data == "": 
+                #self.helper.log_info(f"\n\n [INFO] Loop exit. (data == "":) [FPolicy : "+policy_name+"] \n\n")
                 break
             else: 
-                self.helper.log_info(f"\n\n [INFO] Loop exit. [FPolicy : "+policy_name+"] \n\n")
+                #self.helper.log_info(f"\n\n [INFO] Loop exit. (else: )[FPolicy : "+policy_name+"] \n\n")
                 break
 
-        self.helper.log_info(f"\n\n [INFO] ClientHandler END. [FPolicy : "+policy_name+"] \n\n")
+        self.helper.log_info(f"\n\n [INFO] Client handling is done. [FPolicy : "+policy_name+"] \n\n")
 
         #Connection from {self.address} closed
         #self.client_socket.close()
@@ -233,7 +222,7 @@ class ModInputSERVER_INPUT(base_mi.BaseModInput):
 
         # get input values
         index=helper.get_arg("index")
-        sourcetype=helper.get_arg("account")['name']
+        sourcetype=helper.get_arg("sourcetype")
         host = helper.get_arg("Server_IP")
         port = int(helper.get_arg("Server_Port"))
 

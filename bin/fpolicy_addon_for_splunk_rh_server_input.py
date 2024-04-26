@@ -26,6 +26,21 @@ fields = [
         )
     ), 
     field.RestField(
+        'sourcetype',
+        required=True,
+        encrypted=False,
+        default=None,
+        validator=validator.AllOf(
+            validator.Pattern(
+                regex=r"""^[a-zA-Z\w-]*$""", 
+            ), 
+            validator.String(
+                max_len=100, 
+                min_len=1, 
+            )
+        )
+    ), 
+    field.RestField(
         'account',
         required=True,
         encrypted=False,

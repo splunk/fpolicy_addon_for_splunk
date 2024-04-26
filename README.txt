@@ -11,10 +11,6 @@ More Info About the Add-on
 The FPolicy Add-on for Splunk:
 (20/10/2023) version 0.6.5 → Initial tests with cloud instance done.
 (20/12/2023) version 0.7.1 → Logging update. (splunk/var/log/splunk/server_input.log)
-(09/02/2024) version 1.0.7 → Write down the File Notification Events to an index.
-(14/03/2024) version 1.2.2 → Data decode issue is resolved. 
-(28/03/2024) version 1.3.3 → Issues resolved about single node setup. 
-(11/04/2024) version 1.5.6 → Cluster support (Multiple NetApp ONTAP nodes.)
 
 Under the same subnet, it should be able to send and process;
 KEEP_ALIVE.xml, NEGO_REQ.xml, and SCREEN_REQ.xml

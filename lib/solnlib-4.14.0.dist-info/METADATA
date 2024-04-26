@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: solnlib
-Version: 4.13.0
+Version: 4.14.0
 Summary: The Splunk Software Development Kit for Splunk Solutions
 Home-page: https://github.com/splunk/addonfactory-solutions-library-python
 License: Apache-2.0

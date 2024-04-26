@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: splunktalib
-Version: 3.0.4
+Version: 3.0.5
 Summary: Supporting library for Splunk Add-ons
 Home-page: https://github.com/splunk/addonfactory-ta-library-python
 License: Apache-2.0
