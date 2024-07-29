@@ -1,92 +1,132 @@
 # FPolicy Add-on for Splunk
 
-## Required
-- ONTAP FPolicy Framework ready for Policy configuration.
-- Splunk Enterprise to install FPolicy Add-on for Splunk (As an External Server)
-- End User (User that manipulates SVM for event creation.)
-- Network Connection between End User, ONTAP FPolicy, and Splunk Enterprise.
+## Table of Contents
 
-## More Info About the Add-on
-The FPolicy Add-on for Splunk:
-- (20/10/2023) version 0.6.5 → Initial tests with cloud instance done.
-- (20/12/2023) version 0.7.1 → Logging update. (`splunk/var/log/splunk/server_input.log`)
+- [Requirements](#requirements)
+- [Add-on Information](#add-on-information)
+- [Setup and Configuration](#setup-and-configuration)
+  - [FPolicy Add-on for Splunk Setup](#fpolicy-add-on-for-splunk-setup)
+  - [ONTAP FPolicy Setup](#ontap-fpolicy-setup)
+  - [FPolicy Policy Configuration](#fpolicy-policy-configuration)
+  - [Handshake Process](#handshake-process)
+  - [Troubleshooting](#troubleshooting)
+  - [Network Connection Tests](#network-connection-tests)
+- [File Access Auditing](#file-access-auditing)
+- [FPolicy Framework](#fpolicy-framework)
+- [FPolicy Add-on for Splunk](#fpolicy-add-on-for-splunk)
+- [Overall Topology and Handshake Process](#overall-topology-and-handshake-process)
+- [Authentication Mechanisms](#authentication-mechanisms)
+- [Integrated Monitoring and Alerting](#integrated-monitoring-and-alerting)
+- [Author](#author)
 
-Under the same subnet, it should be able to send and process:
-- `KEEP_ALIVE.xml`
-- `NEGO_REQ.xml`
-- `SCREEN_REQ.xml`
+## Requirements
 
-The add-on can process them as expected.
+- ONTAP FPolicy Framework ready for policy configuration.
+- Splunk Enterprise to install the FPolicy Add-on (as an external server).
+- Network connection between the end user, ONTAP FPolicy, and Splunk Enterprise.
 
-### Notes:
-- External Server IP needs to be set as the device IP. Only the Port number is optional.
-- The policy Name should be the same as in the ONTAP FPolicy to have a proper handshake.
+## Add-on Information
 
-## More Info About the Handshake Process
-### Negotiation Request (Handshake Request)
-After establishing a secure connection between the External FPolicy server (Splunk) and the node, the node sends the FPolicy protocol versions that it supports to the External FPolicy server (Splunk).
-After sending the Negotiation Request, the node waits for two seconds for the External FPolicy server (Splunk) to respond. If a response is not received within two seconds, the node resends the Negotiation Request.
-This process repeats as many times as specified in the max-connection-retries input attribute. If a response is not received, the node stops sending Negotiation Requests to the External FPolicy server (Splunk).
+- **Version 0.6.5 (20/10/2023):** Initial tests with cloud instance completed.
+- **Version 0.7.1 (20/12/2023):** Logging updates (`splunk/var/log/splunk/server_input.log`).
+- **Version 1.3.3 (28/03/2024):** Single SVM node support.
+- **Version 1.5.6 (11/04/2024):** Full cluster support.
+- **Version 1.7.6 (09/05/2024):** Sourcetype selection, support for up to 8 nodes per cluster, resolved intermittent issues.
 
-### Negotiation Response (Handshake Response)
-Once the node sends the list of FPolicy protocol versions that it supports via the Negotiation Request, the External FPolicy server (Splunk) must respond with a Negotiation Response that specifies the protocol version it would like to use to communicate with the node.
-The node accepts the first response it receives and will discard any duplicate or later responses that it receives from other External FPolicy server (Splunk).
+### Notes
 
-### Negotiation Error
-When the External FPolicy server (Splunk) sends a Negotiation Response with a protocol version the node does not support, the node generates an error message.
-In that scenario, the node sends an alert message to the External FPolicy server (Splunk) and terminates the connection. The alert message contains the reason for the disconnection.
+- Set the external server IP as the device IP (or leave it as `0.0.0.0`); the port number should be any unused port number.
+- Match the policy name in ONTAP FPolicy for a proper handshake.
 
-## To-do
-Send XML format data over TCP (Examples are below) to the External FPolicy server (Splunk) to see the response. (To confirm the Add-on will work as expected.)
-Then set the ONTAP FPolicy node to send a Negotiation Request. (Monitor the traffic if possible via Wireshark.)
-Confirm if the configuration and handshake are successful on the ONTAP FPolicy side.
-Confirm if the External FPolicy server (Splunk) receives the XML notifications.
+## Setup and Configuration
 
-### XML Schema for Handshake Response.
-The XML Schema fields are described below:
-- **VsUUID:** This field contains the vserver UUID where FPolicy is enabled.
-- **PolicyName:** This field contains the policy name in the vserver for which an external connection is established with the External FPolicy server to provide file notification.
-- **SessionID:** This is a unique identifier created by the storage appliance once a secure connection is established with the External FPolicy server. The External FPolicy server must store the session_id to tag a connection for a policy. The storage appliance will use this session_id in case the connection is broken, and FSM re-establishes the session. The session_id is also useful for VIF movement within the same node.
-- **ProtVersions:** This field contains the protocol version number. In the future, protocol handshake requests might contain multiple protocol versions, as sent by the storage appliance to the External FPolicy server. The External FPolicy server must return one protocol from the list of protocols provided in the Handshake Request.
+### FPolicy Add-on for Splunk Setup
 
-### File Notification Example after the Handshake:
-"...."<?xml version="1.0"?><Header><NotfType>NEGO_REQ</NotfType><ContentLen>287</ContentLen><DataFormat>XML</DataFormat></Header>
-<?xml version="1.0"?><Handshake><VsUUID>45228b37-6292-11ee-b5d1-000c29cdbe04</VsUUID><PolicyName>policy-test-flo</PolicyName><SessionId>d8ad84cc-79dd-11ee-b638-000c29cdbe04</SessionId><ProtVersion><Vers>1.0</Vers><Vers>1.1</Vers><Vers>1.2</Vers><Vers>2.0</Vers></ProtVersion></Handshake>."...h"<?xml version="1.0"?><Header><NotfType>NEGO_RESP</NotfType><ContentLen>234</ContentLen><DataFormat>XML</DataFormat></Header>
-<?xml version="1.0"?><HandshakeResp><VsUUID>45228b37-6292-11ee-b5d1-000c29cdbe04</VsUUID><PolicyName>policy-test-flo</PolicyName><SessionId>d8ad84cc-79dd-11ee-b638-000c29cdbe04</SessionId><ProtVersion>1.2</ProtVersion></HandshakeResp>"...|"<?xml version="1.0"?><Header><NotfType>KEEP_ALIVE</NotfType><ContentLen>0</ContentLen><DataFormat>XML</DataFormat></Header>."...|"<?xml version="1.0"?><Header><NotfType>KEEP_ALIVE</NotfType><ContentLen>0</ContentLen><DataFormat>XML</DataFormat></Header>."...|"<?xml version="1.0"?><Header><NotfType>KEEP_ALIVE</NotfType><ContentLen>0</ContentLen><DataFormat>XML</DataFormat></Header>."...|"<?xml version="1.0"?><Header><NotfType>KEEP_ALIVE</NotfType><ContentLen>0</ContentLen><DataFormat>XML</DataFormat></Header>."...."<?xml version="1.0"?><Header><NotfType>SCREEN_REQ</NotfType><ContentLen>1038</ContentLen><DataFormat>XML</DataFormat></Header>
-<?xml version="1.0"?><FscreenReq><ReqId>2822</ReqId><ReqType>SMB_OPEN</ReqType><NotfInfo><SmbOpenReq><CommonInfo><ProtCommonInfo><ClientIp>192.168.11.26</ClientIp><GenerationTime>1698970793791282</GenerationTime><UsrIdType>MAPPED_ID</UsrIdType><UsrContext><MappedId><Uid>0</Uid><WinSid>S-1-5-21-1595729341-2636328267-1414669823-1000</WinSid></MappedId></UsrContext><FileOwner><WinSid>S-1-5-32-544</WinSid></FileOwner><AccessPath><Path><PathNameType>WIN_NAME</PathNameType><PathName>\ntfs01</PathName></Path><Path><PathNameType>UNIX_NAME</PathNameType><PathName>/ntfs01</PathName></Path></AccessPath><VolMsid>2157674396</VolMsid><FileSize>4096</FileSize><NumHardLnk>2</NumHardLnk><IsOfflineAttr>0</IsOfflineAttr><FileType>DIR</FileType><IsSparse>0</IsSparse><IsDense>0</IsDense></ProtCommonInfo><DisplayPath>\\SVM0\ntfs01\</DisplayPath><ProtVer><MajorNum>3</MajorNum><MinorNum>1</MinorNum></ProtVer></CommonInfo><OpenAccmode>129</OpenAccmode><OpenSharemode>7</OpenSharemode><OpenOptions>0</OpenOptions></SmbOpenReq></NotfInfo></FscreenReq>.
+1. **Download and Install the Add-on**:
+   - Obtain the FPolicy Add-on from Splunkbase or your internal repository.
+   - Install the Add-on in Splunk Enterprise.
 
-## Tests to Confirm Network Connection
-If possible, install Wireshark to monitor all the traffic between Splunk Enterprise and use the commands below.
+2. **Configuration**:
+   - **Name**: Provide a unique name for the configuration.
+   - **Index**: Select or create an appropriate index for storing FPolicy events.
+   - **Account**: Use an account with necessary permissions.
+   - **IP**: Enter the local instance IP or `0.0.0.0`.
+   - **Port**: Specify any unused port.
+   - **Policy Name**: Ensure it matches the FPolicy configuration for a successful handshake.
 
-- `nc <client_ip> <client_port> < response.xml`
-- `[server_ip_addr] curl ifconfig.me`
+### ONTAP FPolicy Setup
 
-Verify if you have correctly set the port number on the source host, and ensure that the port is both reachable and not blocked by the firewall.
+Follow the NetApp ONTAP FPolicy guidelines for detailed instructions.
 
-- `nmap -p 1234 <ip>`
+### FPolicy Policy Configuration
 
-Finally, confirm that the 'nc' utility is actively listening on the destination host.
+1. **Create FPolicy Event**: Define the events to audit (e.g., create, delete, write) and the protocol (CIFS, NFSv3, NFSv4).
+2. **Create FPolicy External Engine**: Provide the IP address and TCP port of the add-on.
+3. **Create FPolicy Policy**: Link events with the external engine.
+4. **Create FPolicy Scope**: Define the data to audit (e.g., SVM, share, export-policy).
+5. **Enable FPolicy**: Activate the policy.
 
-- `netstat -ant | grep 1234`
+### Handshake Process
 
-In addition, using “tcpdump” may be helpful to monitor the traffic.
+#### Negotiation Request
 
-- `tcpdump dst port 1234`
-- `tcpdump src <ip>`
+- The node sends supported FPolicy protocol versions to the external server (Splunk).
+- Waits for two seconds for a response, and retries as per `max-connection-retries`.
 
-## ONTAP FPolicy Steps
-Get ONTAP FPolicy Framework and set up running with Interfaces up.
+#### Negotiation Response
 
-### Steps
-1. After a few minutes from starting the machine, you receive a message to log in to System Manager to complete cluster setup. This message includes an IP address. Copy this IP address and paste it into your browser address bar to open System Manager.
-2. Ignore the message indicating that the partner node is not found.
-3. Configure the single node cluster in System Manager. Follow the on-screen prompts.
+- The external server (Splunk) responds with the selected protocol version.
+- The node accepts the first response and discards duplicates.
 
-If an IP address is not automatically configured, complete the following steps.
+#### Negotiation Error
 
-#### Steps
-1. Open the command prompt and execute `ifconfig`.
-2. Pick an unused IP from the subnet of "IPv4 Address".
-3. Login to the console and execute the following command to configure the IP:
+- If an unsupported protocol version is sent, the node sends an error, alerts the external server, and terminates the connection.
 
-Author: Gurkan Gokdemir (ggokdemir@splunk.com)
+### Troubleshooting
+
+1. Verify the external server (Splunk) response.
+2. Ensure the ONTAP FPolicy node sends a negotiation request.
+3. Monitor network traffic using tools like Wireshark.
+4. Confirm successful configuration and handshake on ONTAP FPolicy.
+5. Ensure the external server (Splunk) receives XML notifications.
+
+### Network Connection Tests
+
+Use Wireshark to monitor traffic and run the following commands:
+
+```bash
+nc <client_ip> <client_port> < response.xml
+curl ifconfig.me
+nmap -p <port> <ip>
+netstat -ant | grep <port>
+tcpdump dst port <port>
+tcpdump src <ip>
+```
+
+## File Access Auditing
+
+File Access Auditing (FAA) involves monitoring file access via CIFS, NFSv3, or NFSv4.x protocols on NTFS and Unix file systems. It records actions such as creation, modification, deletion, and access of files.
+
+## FPolicy Framework
+
+FPolicy is an ONTAP component for real-time monitoring and setting file access permissions, crucial for security and compliance.
+
+## FPolicy Add-on for Splunk
+
+The add-on enhances Splunk's capabilities by integrating file event notifications from NetApp, allowing real-time monitoring and analysis of file operations for security and compliance.
+
+## Overall Topology and Handshake Process
+
+A TCP/IP connection is established between each node and the FPolicy Add-on for Splunk. The handshake process ensures secure communication, with the add-on supporting ASYNC Mode and TCP layer acknowledgment.
+
+## Authentication Mechanisms
+
+The handshake is initiated by the policy, requiring admin rights. The policy name in the add-on configuration must match the FPolicy configuration. TCP ensures secure and reliable data transmission, with SSL support for secure data transmission.
+
+## Integrated Monitoring and Alerting
+
+Using `props.conf` and `transforms.conf`, Splunk extracts fields from raw data logs, filters unnecessary parts, and anonymizes certain information. The integration supports automated alerts based on FPolicy events, enhancing security and compliance.
+
+## Author
+
+Gurkan Gokdemir (ggokdemir@splunk.com)
