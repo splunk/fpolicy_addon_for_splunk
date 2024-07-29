@@ -1,5 +1,7 @@
 # FPolicy Add-on for Splunk
 
+NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access Notifications over network port (TCP) as XML Notifications into the Splunk platform for the NetApp ONTAP FPolicy Framework that manages NetApp SVMs.
+
 ## Table of Contents
 
 - [Requirements](#requirements)
