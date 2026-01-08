@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import List, Optional
 
-
+from .field import RestField
 from ..error import RestError
 from ..util import get_base_app_name
 
@@ -28,14 +29,18 @@ __all__ = [
 
 
 class RestModel:
-    def __init__(self, fields, name=None):
+    def __init__(
+        self, fields, name=None, special_fields: Optional[List[RestField]] = None
+    ):
         """
         REST Model.
         :param name:
         :param fields:
+        :param special_fields:
         """
         self.name = name
         self.fields = fields
+        self.special_fields = special_fields if special_fields else []
 
 
 class RestEndpoint:
