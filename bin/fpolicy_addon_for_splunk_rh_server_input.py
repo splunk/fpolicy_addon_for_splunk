@@ -14,6 +14,24 @@ import logging
 util.remove_http_proxy_env_vars()
 
 
+special_fields = [
+    field.RestField(
+        'name',
+        required=True,
+        encrypted=False,
+        default=None,
+        validator=validator.AllOf(
+            validator.Pattern(
+                regex=r"""^[a-zA-Z\w-]*$""", 
+            ), 
+            validator.String(
+                max_len=100, 
+                min_len=1, 
+            )
+        )
+    )
+]
+
 fields = [
     field.RestField(
         'index',
@@ -39,13 +57,6 @@ fields = [
                 min_len=1, 
             )
         )
-    ), 
-    field.RestField(
-        'account',
-        required=True,
-        encrypted=False,
-        default=None,
-        validator=None
     ), 
     field.RestField(
         'Server_IP',
@@ -82,6 +93,27 @@ fields = [
             )
         )
     ), 
+    field.RestField(
+        'use_ssl',
+        required=False,
+        encrypted=False,
+        default=False,
+        validator=None
+    ), 
+    field.RestField(
+        'sa_cert',
+        required=False,
+        encrypted=False,
+        default='empty',
+        validator=None
+    ), 
+    field.RestField(
+        'sa_key',
+        required=False,
+        encrypted=False,
+        default='empty',
+        validator=None
+    ), 
 
     field.RestField(
         'disabled',
@@ -90,7 +122,7 @@ fields = [
     )
 
 ]
-model = RestModel(fields, name=None)
+model = RestModel(fields, name=None, special_fields=special_fields)
 
 
 
