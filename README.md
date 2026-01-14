@@ -19,7 +19,11 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
 - [Overall Topology and Handshake Process](#overall-topology-and-handshake-process)
 - [Authentication Mechanisms](#authentication-mechanisms)
 - [Integrated Monitoring and Alerting](#integrated-monitoring-and-alerting)
-- [Author](#author)
+- [Development and Building](#development-and-building)
+  - [Prerequisites for Development](#prerequisites-for-development)
+  - [Building the Add-on](#building-the-add-on)
+  - [Development Reference](#development-reference)
+- [Authors](#authors)
 
 ## Requirements
 
@@ -50,12 +54,15 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
    - Install the Add-on in Splunk Enterprise.
 
 2. **Configuration**:
-   - **Name**: Provide a unique name for the configuration.
+   - **Name**: Provide a unique name for the data input.
    - **Index**: Select or create an appropriate index for storing FPolicy events.
-   - **Account**: Use an account with necessary permissions.
-   - **IP**: Enter the local instance IP or `0.0.0.0`.
-   - **Port**: Specify any unused port.
-   - **Policy Name**: Ensure it matches the FPolicy configuration for a successful handshake.
+   - **Sourcetype**: Define a unique sourcetype for the data.
+   - **Add-on Server IP**: Enter the external IP of the Splunk instance or `0.0.0.0` (default: `0.0.0.0`).
+   - **Add-on Server Port**: Specify any unused port number for each input (default: `1337`).
+   - **Policy Name**: FPolicy File Policy Name - must match the FPolicy configuration for a successful handshake.
+   - **Use SSL** (optional): Enable SSL/TLS encryption for ONTAP connection.
+     - **SA Certificate**: Upload server-side SSL certificate (.pem or .txt file).
+     - **SA Key**: Upload server-side SSL key (.pem or .txt file).
 
 ### ONTAP FPolicy Setup
 
@@ -129,6 +136,46 @@ The handshake is initiated by the policy, requiring admin rights. The policy nam
 ## Integrated Monitoring and Alerting
 
 Using `props.conf` and `transforms.conf`, Splunk extracts fields from raw data logs, filters unnecessary parts, and anonymizes certain information. The integration supports automated alerts based on FPolicy events, enhancing security and compliance.
+
+## Development and Building
+
+### Prerequisites for Development
+
+- Python 3.7+
+- Splunk UCC Generator (`pip install splunk-add-on-ucc-framework`)
+- Access to the fpolicy_addon_for_splunk source repository
+
+### Building the Add-on
+
+If you want to contribute to the add-on or build it from source:
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/splunk/fpolicy_addon_for_splunk.git
+   cd fpolicy_addon_for_splunk/fpolicy_addon_for_splunk
+   ```
+
+2. **Build the add-on**:
+
+   ```bash
+   ucc-gen build --ta-version 1.8.1
+   ```
+
+3. **Package the add-on**:
+
+   ```bash
+   ucc-gen package --path output/fpolicy_addon_for_splunk
+   ```
+
+The packaged archive will be created in the same directory as your `globalConfig.json` file.
+
+### Development Reference
+
+For detailed UCC framework documentation and development guidelines, see:
+
+- [UCC Generator Quickstart](https://splunk.github.io/addonfactory-ucc-generator/quickstart/)
+- [Splunk Add-on UCC Framework Documentation](https://splunk.github.io/addonfactory-ucc-generator/)
 
 ## Authors
 
