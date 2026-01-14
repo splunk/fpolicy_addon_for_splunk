@@ -34,6 +34,7 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
 - **Version 1.3.3 (28/03/2024):** Single SVM node support.
 - **Version 1.5.6 (11/04/2024):** Full cluster support.
 - **Version 1.7.6 (09/05/2024):** Sourcetype selection, support for up to 8 nodes per cluster, resolved intermittent issues.
+- **Version 1.8.1 (14/01/2026):** SSL/TLS encryption support, removed deprecated Accounts section.
 
 ### Notes
 
@@ -129,6 +130,7 @@ The handshake is initiated by the policy, requiring admin rights. The policy nam
 
 Using `props.conf` and `transforms.conf`, Splunk extracts fields from raw data logs, filters unnecessary parts, and anonymizes certain information. The integration supports automated alerts based on FPolicy events, enhancing security and compliance.
 
-## Author
+## Authors
 
 Gurkan Gokdemir (ggokdemir@splunk.com)
+Bartosz Debek (bdebek@splunk.com)
