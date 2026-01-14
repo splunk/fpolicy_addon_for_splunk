@@ -1,5 +1,9 @@
 # FPolicy Add-on for Splunk
 
+![Version](https://img.shields.io/badge/version-1.8.1-blue)
+![Splunk](https://img.shields.io/badge/Splunk-Enterprise-green)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue)
+
 NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access Notifications over network port (TCP) as XML Notifications into the Splunk platform for the NetApp ONTAP FPolicy Framework that manages NetApp SVMs.
 
 ## Table of Contents
@@ -23,13 +27,23 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
   - [Prerequisites for Development](#prerequisites-for-development)
   - [Building the Add-on](#building-the-add-on)
   - [Development Reference](#development-reference)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
 - [Authors](#authors)
 
 ## Requirements
 
-- ONTAP FPolicy Framework ready for policy configuration.
-- Splunk Enterprise to install the FPolicy Add-on (as an external server).
-- Network connection between the end user, ONTAP FPolicy, and Splunk Enterprise.
+| Component | Requirement |
+|-----------|-------------|
+| Splunk Enterprise | 8.x or later |
+| ONTAP | FPolicy Framework enabled |
+| Python | 3.7+ (bundled with Splunk) |
+| Network | TCP connectivity between ONTAP and Splunk |
+
+**Additional requirements for SSL/TLS:**
+- Valid SSL certificate and private key (.pem format)
+- TLS 1.2 support on ONTAP cluster
 
 ## Add-on Information
 
@@ -60,9 +74,10 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
    - **Add-on Server IP**: Enter the external IP of the Splunk instance or `0.0.0.0` (default: `0.0.0.0`).
    - **Add-on Server Port**: Specify any unused port number for each input (default: `1337`).
    - **Policy Name**: FPolicy File Policy Name - must match the FPolicy configuration for a successful handshake.
-   - **Use SSL** (optional): Enable SSL/TLS encryption for ONTAP connection.
-     - **SA Certificate**: Upload server-side SSL certificate (.pem or .txt file).
-     - **SA Key**: Upload server-side SSL key (.pem or .txt file).
+   - **Use SSL** (optional): Enable TLS 1.2 encryption for ONTAP connection.
+     - **SA Certificate**: Upload server-side SSL certificate (.pem or .txt file, max 100KB). Required when SSL is enabled.
+     - **SA Key**: Upload server-side SSL private key (.pem or .txt file, max 100KB). Required when SSL is enabled.
+     - **Note**: Certificates are stored in `$SPLUNK_HOME/etc/apps/fpolicy_addon_for_splunk/certs/` directory.
 
 ### ONTAP FPolicy Setup
 
@@ -176,6 +191,28 @@ For detailed UCC framework documentation and development guidelines, see:
 
 - [UCC Generator Quickstart](https://splunk.github.io/addonfactory-ucc-generator/quickstart/)
 - [Splunk Add-on UCC Framework Documentation](https://splunk.github.io/addonfactory-ucc-generator/)
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add your feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+Please ensure your code follows the existing style and includes appropriate tests.
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE.txt](package/LICENSE.txt) file for details.
+
+## Support
+
+For issues and feature requests, please use the [GitHub Issues](https://github.com/splunk/fpolicy_addon_for_splunk/issues) page.
+
+For general questions about Splunk, visit [Splunk Answers](https://community.splunk.com/).
 
 ## Authors
 
