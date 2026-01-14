@@ -17,10 +17,12 @@ util.remove_http_proxy_env_vars()
 fields_logging = [
     field.RestField(
         'loglevel',
-        required=False,
+        required=True,
         encrypted=False,
         default='INFO',
-        validator=None
+        validator=validator.Pattern(
+            regex=r"""^DEBUG|INFO|WARN|ERROR|CRITICAL$""", 
+        )
     )
 ]
 model_logging = RestModel(fields_logging, name='logging')
@@ -31,6 +33,7 @@ endpoint = MultipleModel(
     models=[
         model_logging
     ],
+    need_reload=False,
 )
 
 

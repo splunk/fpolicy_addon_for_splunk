@@ -3,46 +3,8 @@
         "configuration": {
             "tabs": [
                 {
-                    "name": "account",
-                    "table": {
-                        "actions": [
-                            "edit",
-                            "delete",
-                            "clone"
-                        ],
-                        "header": [
-                            {
-                                "label": "Name",
-                                "field": "name"
-                            }
-                        ]
-                    },
-                    "entity": [
-                        {
-                            "type": "text",
-                            "label": "Name",
-                            "validators": [
-                                {
-                                    "type": "regex",
-                                    "errorMsg": "Account Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
-                                    "pattern": "^[a-zA-Z]\\w*$"
-                                },
-                                {
-                                    "type": "string",
-                                    "errorMsg": "Length of input name should be between 1 and 100",
-                                    "minLength": 1,
-                                    "maxLength": 100
-                                }
-                            ],
-                            "field": "name",
-                            "help": "A unique name for the account.",
-                            "required": true
-                        }
-                    ],
-                    "title": "Accounts"
-                },
-                {
                     "name": "logging",
+                    "title": "Logging",
                     "entity": [
                         {
                             "type": "singleSelect",
@@ -73,10 +35,17 @@
                                 ]
                             },
                             "defaultValue": "INFO",
-                            "field": "loglevel"
+                            "field": "loglevel",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Log level must be one of: DEBUG, INFO, WARN, ERROR, CRITICAL",
+                                    "pattern": "^DEBUG|INFO|WARN|ERROR|CRITICAL$"
+                                }
+                            ]
                         }
-                    ],
-                    "title": "Logging"
+                    ]
                 }
             ],
             "title": "Configuration",
@@ -150,16 +119,6 @@
                             "required": true
                         },
                         {
-                            "type": "singleSelect",
-                            "label": "Account to use",
-                            "options": {
-                                "referenceName": "account"
-                            },
-                            "help": "Account to use for this input.",
-                            "field": "account",
-                            "required": true
-                        },
-                        {
                             "type": "text",
                             "label": "Add-on Server IP",
                             "field": "Server_IP",
@@ -173,10 +132,7 @@
                                     "maxLength": 15,
                                     "errorMsg": "IP only."
                                 }
-                            ],
-                            "options": {
-                                "placeholder": "ex: 192.168.10.10"
-                            }
+                            ]
                         },
                         {
                             "type": "text",
@@ -192,10 +148,7 @@
                                     "minLength": 2,
                                     "maxLength": 5
                                 }
-                            ],
-                            "options": {
-                                "placeholder": "ex: 12345"
-                            }
+                            ]
                         },
                         {
                             "type": "text",
@@ -216,6 +169,92 @@
                             "field": "Policy_Name",
                             "help": "FPolicy File Policy Name. Please see the 'vserver fpolicy policy show' output. (Use the same Policy Name for a successful handshake with FPolicy. )",
                             "required": true
+                        },
+                        {
+                            "type": "checkbox",
+                            "label": "Use SSL",
+                            "field": "use_ssl",
+                            "defaultValue": false,
+                            "help": "Check if you want to use SSL for ONTAP connection.",
+                            "modifyFieldsOnValue": [
+                                {
+                                    "fieldValue": 1,
+                                    "fieldsToModify": [
+                                        {
+                                            "fieldId": "sa_cert",
+                                            "required": true
+                                        },
+                                        {
+                                            "fieldId": "sa_key",
+                                            "required": true
+                                        }
+                                    ]
+                                },
+                                {
+                                    "fieldValue": 0,
+                                    "fieldsToModify": [
+                                        {
+                                            "fieldId": "sa_cert",
+                                            "required": false
+                                        },
+                                        {
+                                            "fieldId": "sa_key",
+                                            "required": false
+                                        }
+                                    ]
+                                },
+                                {
+                                    "fieldValue": "[[any_other_value]]",
+                                    "fieldsToModify": [
+                                        {
+                                            "fieldId": "sa_cert",
+                                            "required": false
+                                        },
+                                        {
+                                            "fieldId": "sa_key",
+                                            "required": false
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "file",
+                            "label": "SA Certificate",
+                            "help": "Upload server side SSL certificate.",
+                            "field": "sa_cert",
+                            "options": {
+                                "fileSupportMessage": ".pem or .txt file",
+                                "supportedFileTypes": [
+                                    "pem",
+                                    "txt"
+                                ],
+                                "maxFileSize": 100,
+                                "useBase64Encoding": false,
+                                "display": true
+                            },
+                            "encrypted": false,
+                            "required": false,
+                            "defaultValue": "empty"
+                        },
+                        {
+                            "type": "file",
+                            "label": "SA Key",
+                            "help": "Upload server side SSL Key.",
+                            "field": "sa_key",
+                            "options": {
+                                "fileSupportMessage": ".pem or .txt file",
+                                "supportedFileTypes": [
+                                    "pem",
+                                    "txt"
+                                ],
+                                "maxFileSize": 100,
+                                "useBase64Encoding": false,
+                                "display": true
+                            },
+                            "encrypted": false,
+                            "required": false,
+                            "defaultValue": "empty"
                         }
                     ],
                     "title": "server_input"
@@ -226,7 +265,6 @@
             "table": {
                 "actions": [
                     "edit",
-                    "enable",
                     "delete",
                     "clone"
                 ],
@@ -262,10 +300,6 @@
                         "field": "sourcetype"
                     },
                     {
-                        "label": "Account to use",
-                        "field": "account"
-                    },
-                    {
                         "label": "Status",
                         "field": "disabled",
                         "mapping": {
@@ -284,6 +318,14 @@
                     {
                         "label": "FPolicy Name",
                         "field": "Policy_Name"
+                    },
+                    {
+                        "label": "Use SSL",
+                        "field": "use_ssl",
+                        "mapping": {
+                            "1": "Yes",
+                            "0": "No"
+                        }
                     }
                 ]
             }
@@ -291,13 +333,7 @@
         "dashboard": {
             "panels": [
                 {
-                    "name": "addon_version"
-                },
-                {
-                    "name": "events_ingested_by_sourcetype"
-                },
-                {
-                    "name": "errors_in_the_addon"
+                    "name": "default"
                 }
             ]
         }
@@ -305,8 +341,10 @@
     "meta": {
         "name": "fpolicy_addon_for_splunk",
         "restRoot": "fpolicy_addon_for_splunk",
-        "version": "1.7.6",
+        "version": "1.7.7",
         "displayName": "FPolicy Add-on for Splunk",
-        "schemaVersion": "0.0.3"
+        "schemaVersion": "0.0.10",
+        "defaultView": "search",
+        "_uccVersion": "6.1.0"
     }
 }

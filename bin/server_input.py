@@ -2,6 +2,8 @@ import import_declare_test
 
 import sys
 import json
+import ssl
+from datetime import datetime
 
 from splunklib import modularinput as smi
 
@@ -166,30 +168,6 @@ class ModInputSERVER_INPUT(base_mi.BaseModInput):
         super(ModInputSERVER_INPUT, self).__init__(app_name, "server_input", use_single_instance) 
         self.global_checkbox_fields = None
 
-    def get_scheme(self):
-        scheme = smi.Scheme('server_input')
-        scheme.description = 'server_input'
-        scheme.use_external_validation = True
-        scheme.streaming_mode_xml = True
-        scheme.use_single_instance = False
-
-        scheme.add_argument(
-            smi.Argument(
-                'name',
-                title='Name',
-                description='Name',
-                required_on_create=True
-            )
-        )
-        scheme.add_argument(
-            smi.Argument(
-                'account',
-                required_on_create=True,
-            )
-        )
-        
-        return scheme
-
     def validate_input(self, definition):
         """validate the input stanza"""
         """Implement your own validation logic to validate the input stanza configurations"""
@@ -225,25 +203,69 @@ class ModInputSERVER_INPUT(base_mi.BaseModInput):
         sourcetype=helper.get_arg("sourcetype")
         host = helper.get_arg("Server_IP")
         port = int(helper.get_arg("Server_Port"))
+        use_ssl = helper.get_arg("use_ssl")
+        sa_certificate = helper.get_arg("sa_cert")
+        sa_key = helper.get_arg("sa_key")
 
-        # socket object
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # bind the socket
-        sock.bind((host, port))
-        sock.listen(5)
-        # listen for five connection at a time
-        helper.log_info(f"\n\n [INFO] Socket on {host}:{port} [FPolicy : "+policy_name+"] \n\n")
+        helper.log_debug(f"USE SSL : {use_ssl}")
 
-        while True:
+        if use_ssl == "1":
+            helper.log_info(f"\n\n [INFO] SSL enabled.\n\n")
+            
+            cert_name = "cert_" + policy_name + ".pem"
+            key_name = "key_" + policy_name + ".pem"
 
-            # wait for the first connection
-            helper.log_info(f"\n\n [INFO] Listening... [FPolicy : "+policy_name+"] \n\n")
+            cert_file_path = os.path.join(os.environ['SPLUNK_HOME'], 'etc', 'apps', 'fpolicy_addon_for_splunk', 'certs', cert_name)
+            key_file_path = os.path.join(os.environ['SPLUNK_HOME'], 'etc', 'apps', 'fpolicy_addon_for_splunk', 'certs', key_name)
+            
+            os.makedirs(os.path.dirname(cert_file_path), exist_ok=True)
+            os.makedirs(os.path.dirname(key_file_path), exist_ok=True)
 
+            with open(cert_file_path, "w") as cert_file:
+                cert_file.write(sa_certificate)
+
+            with open(key_file_path, "w") as key_file:
+                key_file.write(sa_key)
+            # define SSL context
+            context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            context.load_cert_chain(certfile=cert_file_path, keyfile=key_file_path)
+
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
+                # bind the socket
+                sock.bind((host, port))
+                sock.listen(5)
+                with context.wrap_socket(sock, server_side=True, do_handshake_on_connect=True) as ssock:
+                    # listen for five connection at a time
+                    helper.log_info(f"\n\n [INFO] Socket on {host}:{port} [FPolicy : "+policy_name+"] \n\n")
+
+                    while True:
+                        # wait for the first connection
+                        helper.log_info(f"\n\n [INFO] Listening... [FPolicy : "+policy_name+"] \n\n")
+
+                        while True:
+                            try:
+                                client_sock, client_addr = ssock.accept()
+                                conn_handler = ClientHandler(helper, ew, client_sock, client_addr)
+                                conn_handler.start()
+                            except Exception as e:
+                                helper.log_error('\n\n [ERROR] Get exception when ssock.accept(). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
+        else:
+            helper.log_info(f"\n\n [INFO] SSL disabled.\n\n")
+            # socket object
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # bind the socket
+            sock.bind((host, port))
+            sock.listen(5)
+            # listen for five connection at a time
+            helper.log_info(f"\n\n [INFO] Socket on {host}:{port} [FPolicy : "+policy_name+"] \n\n")
+            
             while True:
-                client_sock, client_addr = sock.accept()
-
-                conn_handler = ClientHandler(helper, ew, client_sock, client_addr)
-                conn_handler.start()
+                # wait for the first connection
+                helper.log_info(f"\n\n [INFO] Listening... [FPolicy : "+policy_name+"] \n\n")
+                while True:
+                    client_sock, client_addr = sock.accept()
+                    conn_handler = ClientHandler(helper, ew, client_sock, client_addr)
+                    conn_handler.start()
 
     def get_account_fields(self):
         account_fields = []
