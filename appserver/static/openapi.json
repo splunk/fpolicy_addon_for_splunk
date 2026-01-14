@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "fpolicy_addon_for_splunk",
-        "version": "1.7.7",
+        "version": "1.8.1",
         "description": "FPolicy Add-on for Splunk",
         "contact": {
             "name": ""

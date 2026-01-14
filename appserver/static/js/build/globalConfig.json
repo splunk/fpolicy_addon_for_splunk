@@ -341,7 +341,7 @@
     "meta": {
         "name": "fpolicy_addon_for_splunk",
         "restRoot": "fpolicy_addon_for_splunk",
-        "version": "1.7.7",
+        "version": "1.8.1",
         "displayName": "FPolicy Add-on for Splunk",
         "schemaVersion": "0.0.10",
         "defaultView": "search",
