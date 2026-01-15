@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+**/__pycache__
 *.py[cod]
 *$py.class
 
@@ -12,6 +13,18 @@ venv/
 
 # macOS system files
 .DS_Store
+
+# Git files
+.git*
+
+# IDE
+.vscode
+
+# Splunk
+local.meta
+
+# Node modules
+**/node_modules
 
 # Log files
 *.log
