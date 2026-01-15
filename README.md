@@ -3,13 +3,24 @@
 ![Version](https://img.shields.io/badge/version-1.8.1-blue)
 ![Splunk](https://img.shields.io/badge/Splunk-Enterprise-green)
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
+![Support](https://img.shields.io/badge/support-community-orange)
 
 NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access Notifications over network port (TCP) as XML Notifications into the Splunk platform for the NetApp ONTAP FPolicy Framework that manages NetApp SVMs.
 
+---
+
+## Features
+
+- **Real-time File Access Monitoring**: Capture file operations (create, modify, delete, access) in real-time
+- **Protocol Support**: Monitor CIFS, NFSv3, and NFSv4.x protocols
+- **SSL/TLS Encryption**: Secure data transmission with TLS 1.2 support (v1.8.1+)
+- **Multi-Node Cluster Support**: Connect to up to 8 ONTAP nodes per cluster
+
 ## Table of Contents
 
+- [Features](#features)
 - [Requirements](#requirements)
-- [Add-on Information](#add-on-information)
+- [Version History](#version-history)
 - [Setup and Configuration](#setup-and-configuration)
   - [FPolicy Add-on for Splunk Setup](#fpolicy-add-on-for-splunk-setup)
   - [ONTAP FPolicy Setup](#ontap-fpolicy-setup)
@@ -30,7 +41,10 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
 - [Contributing](#contributing)
 - [License](#license)
 - [Support](#support)
+- [Resources](#resources)
 - [Authors](#authors)
+
+---
 
 ## Requirements
 
@@ -45,19 +59,18 @@ NetApp ONTAP FPolicy Add-on for Splunk allows Splunk admins to get File Access N
 - Valid SSL certificate and private key (.pem format)
 - TLS 1.2 support on ONTAP cluster
 
-## Add-on Information
+## Version History
 
-- **Version 0.6.5 (20/10/2023):** Initial tests with cloud instance completed.
-- **Version 0.7.1 (20/12/2023):** Logging updates (`splunk/var/log/splunk/server_input.log`).
-- **Version 1.3.3 (28/03/2024):** Single SVM node support.
-- **Version 1.5.6 (11/04/2024):** Full cluster support.
-- **Version 1.7.6 (09/05/2024):** Sourcetype selection, support for up to 8 nodes per cluster, resolved intermittent issues.
-- **Version 1.8.1 (14/01/2026):** SSL/TLS encryption support, removed deprecated Accounts section.
+**Current Version**: 1.8.1 (January 14, 2026)
 
-### Notes
+For detailed version history and release notes, see [CHANGELOG.md](CHANGELOG.md).
+
+### Important Configuration Notes
 
 - Set the external server IP as the device IP (or leave it as `0.0.0.0`); the port number should be any unused port number.
 - Match the policy name in ONTAP FPolicy for a proper handshake.
+
+---
 
 ## Setup and Configuration
 
@@ -128,6 +141,8 @@ tcpdump dst port <port>
 tcpdump src <ip>
 ```
 
+---
+
 ## File Access Auditing
 
 File Access Auditing (FAA) involves monitoring file access via CIFS, NFSv3, or NFSv4.x protocols on NTFS and Unix file systems. It records actions such as creation, modification, deletion, and access of files.
@@ -151,6 +166,8 @@ The handshake is initiated by the policy, requiring admin rights. The policy nam
 ## Integrated Monitoring and Alerting
 
 Using `props.conf` and `transforms.conf`, Splunk extracts fields from raw data logs, filters unnecessary parts, and anonymizes certain information. The integration supports automated alerts based on FPolicy events, enhancing security and compliance.
+
+---
 
 ## Development and Building
 
@@ -192,6 +209,8 @@ For detailed UCC framework documentation and development guidelines, see:
 - [UCC Generator Quickstart](https://splunk.github.io/addonfactory-ucc-generator/quickstart/)
 - [Splunk Add-on UCC Framework Documentation](https://splunk.github.io/addonfactory-ucc-generator/)
 
+---
+
 ## Contributing
 
 We welcome contributions! Please follow these steps:
@@ -204,17 +223,38 @@ We welcome contributions! Please follow these steps:
 
 Please ensure your code follows the existing style and includes appropriate tests.
 
+---
+
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE.txt](package/LICENSE.txt) file for details.
 
+---
+
 ## Support
+
+> **⚠️ IMPORTANT**: **This add-on is not officially supported by Splunk.** Please do not open support tickets with Splunk Support. Use the GitHub Issues page below for all support requests.
+
+If you're using this add-on in your environment, please consider mentioning it to your Splunk account team (Regional Sales Manager and Solutions Engineer). User adoption and feedback help demonstrate the value of this integration and support the case for official Splunk support.
 
 For issues and feature requests, please use the [GitHub Issues](https://github.com/splunk/fpolicy_addon_for_splunk/issues) page.
 
 For general questions about Splunk, visit [Splunk Answers](https://community.splunk.com/).
 
+---
+
+## Resources
+
+- [**.conf24 Builder Bar Theater Session (THE2817)**: Enhancing Visibility with Splunk and NetApp FPolicy](https://docs.google.com/presentation/d/1uKmHYD2VlyRCGZHJVN4KFEXbR1GZQg93g2Su9LhJjDI) - Presentation from the .conf24 Builder Bar Theater
+- [**Implementing File Access Auditing with NetApp FPolicy**](docs/implementing-file-access-auditing-with-netapp-fpolicy.pdf) - Splunk Lantern article covering implementation details
+
 ## Authors
 
-Gurkan Gokdemir (ggokdemir@splunk.com)
-Bartosz Debek (bdebek@splunk.com)
+Created and maintained by:
+
+- **Gurkan Gokdemir** - [ggokdemir@splunk.com](mailto:ggokdemir@splunk.com)
+- **Bartosz Debek** - [bdebek@splunk.com](mailto:bdebek@splunk.com)
+
+---
+
+**Questions or feedback?** Open an issue on [GitHub](https://github.com/splunk/fpolicy_addon_for_splunk/issues) or contact the authors directly.
