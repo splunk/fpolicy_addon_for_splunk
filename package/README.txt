@@ -231,6 +231,26 @@ RESOURCES
   https://docs.google.com/presentation/d/1uKmHYD2VlyRCGZHJVN4KFEXbR1GZQg93g2Su9LhJjDI
 
 ===============================================================================
+SECURITY CONSIDERATIONS
+===============================================================================
+
+SSL/TLS for FPolicy Connections:
+The add-on supports TLS 1.2 encryption for connections between NetApp ONTAP 
+and the Splunk add-on server. When SSL is enabled, the connection uses 
+customer-provided certificates for secure communication.
+
+Splunk SDK SSL Verification:
+The bundled Splunk SDK (splunk-sdk) uses verify=False as the default for SSL 
+connections to the Splunk REST API. This is a known behavior in the upstream 
+Splunk SDK to support backward compatibility with various deployment 
+configurations.
+
+Risk Assessment: Low - The SDK connects to the local Splunk instance's REST 
+API (typically localhost:8089), limiting exposure to man-in-the-middle 
+attacks. The connection remains encrypted; only certificate verification 
+is disabled.
+
+===============================================================================
 LICENSE
 ===============================================================================
 
