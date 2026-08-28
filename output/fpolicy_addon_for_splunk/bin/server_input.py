@@ -234,21 +234,33 @@ class ModInputSERVER_INPUT(base_mi.BaseModInput):
                 # bind the socket
                 sock.bind((host, port))
                 sock.listen(5)
-                with context.wrap_socket(sock, server_side=True, do_handshake_on_connect=True) as ssock:
-                    # listen for five connection at a time
-                    helper.log_info(f"\n\n [INFO] Socket on {host}:{port} [FPolicy : "+policy_name+"] \n\n")
+                # The listening socket must remain a plain TCP socket. TLS is
+                # negotiated after accept(), on each connected client socket.
+                helper.log_info(f"\n\n [INFO] Socket on {host}:{port} [FPolicy : "+policy_name+"] \n\n")
 
-                    while True:
-                        # wait for the first connection
-                        helper.log_info(f"\n\n [INFO] Listening... [FPolicy : "+policy_name+"] \n\n")
+                while True:
+                    # wait for the first connection
+                    helper.log_info(f"\n\n [INFO] Listening... [FPolicy : "+policy_name+"] \n\n")
 
-                        while True:
-                            try:
-                                client_sock, client_addr = ssock.accept()
-                                conn_handler = ClientHandler(helper, ew, client_sock, client_addr)
-                                conn_handler.start()
-                            except Exception as e:
-                                helper.log_error('\n\n [ERROR] Get exception when ssock.accept(). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
+                    try:
+                        client_sock, client_addr = sock.accept()
+                    except Exception as e:
+                        helper.log_error('\n\n [ERROR] Get exception when sock.accept(). '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
+                        continue
+
+                    try:
+                        client_sock = context.wrap_socket(
+                            client_sock,
+                            server_side=True,
+                            do_handshake_on_connect=True,
+                        )
+                    except Exception as e:
+                        client_sock.close()
+                        helper.log_error('\n\n [ERROR] Get exception when TLS handshake is established. '+ str(e)+" [FPolicy : "+policy_name+"] \n\n")
+                        continue
+
+                    conn_handler = ClientHandler(helper, ew, client_sock, client_addr)
+                    conn_handler.start()
         else:
             helper.log_info(f"\n\n [INFO] SSL disabled.\n\n")
             # socket object
@@ -294,5 +306,4 @@ class ModInputSERVER_INPUT(base_mi.BaseModInput):
 if __name__ == '__main__':
     exit_code = ModInputSERVER_INPUT().run(sys.argv)
     sys.exit(exit_code)
-
 
